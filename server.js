@@ -4,23 +4,17 @@ const { Server } = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server); // Inicializa Socket.IO con el servidor HTTP
 
-app.use(express.static('public'));
+app.use(express.static('public')); // Sirve archivos estáticos si tienes una carpeta 'public'
 
 io.on('connection', (socket) => {
-  console.log('Usuario conectado:', socket.id);
+  console.log('Nuevo usuario conectado:', socket.id);
 
-  socket.on('offer', (offer) => {
-    socket.broadcast.emit('offer', offer);
-  });
-
-  socket.on('answer', (answer) => {
-    socket.broadcast.emit('answer', answer);
-  });
-
-  socket.on('ice-candidate', (candidate) => {
-    socket.broadcast.emit('ice-candidate', candidate);
+  // Escucha eventos personalizados del cliente
+  socket.on('mensaje', (data) => {
+    console.log(`Mensaje recibido: ${data}`);
+    io.emit('mensaje', data); // Reenvía el mensaje a todos los clientes conectados
   });
 
   socket.on('disconnect', () => {
@@ -30,5 +24,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
