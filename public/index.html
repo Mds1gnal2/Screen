@@ -3,17 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control de Pantalla Remota</title>
-  <link rel="stylesheet" href="/style.css">
+  <title>Chat en tiempo real</title>
 </head>
 <body>
-  <h1>Control de Pantalla Remota</h1>
-  <div id="video-container">
-    <video id="localVideo" autoplay playsinline></video>
-    <video id="remoteVideo" autoplay playsinline></video>
-  </div>
-  <button id="startScreenShare">Compartir Pantalla</button>
+  <h1>Chat en tiempo real con Socket.IO</h1>
+  <input id="messageInput" type="text" placeholder="Escribe un mensaje">
+  <button id="sendButton">Enviar</button>
 
-  <script src="/client.js"></script>
+  <div id="messages"></div>
+
+  <!-- Cliente de Socket.IO desde CDN -->
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <script>
+    const socket = io(); // Se conecta al servidor
+
+    const sendButton = document.getElementById('sendButton');
+    const messageInput = document.getElementById('messageInput');
+    const messagesDiv = document.getElementById('messages');
+
+    // Enviar un mensaje al hacer clic en el botón
+    sendButton.addEventListener('click', () => {
+      const message = messageInput.value;
+      socket.emit('mensaje', message); // Envía el mensaje al servidor
+      messageInput.value = ''; // Limpia el campo de entrada
+    });
+
+    // Escuchar mensajes del servidor
+    socket.on('mensaje', (message) => {
+      const messageElement = document.createElement('p');
+      messageElement.textContent = message;
+      messagesDiv.appendChild(messageElement); // Muestra el mensaje en la interfaz
+    });
+  </script>
 </body>
 </html>
