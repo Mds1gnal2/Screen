@@ -1,48 +1,34 @@
-import express from 'express';
-import { createServer } from 'http';
-import { Server } from 'socket.io';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { createRequire } from 'module';
-
-const require = createRequire(import.meta.url);
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
-const server = createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"]
-  }
-});
+const server = http.createServer(app);
+const io = new Server(server);
 
-app.use(express.static('dist'));
+app.use(express.static('public'));
 
 io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
+  console.log('Usuario conectado:', socket.id);
 
-  socket.on('create-room', (roomId) => {
-    socket.join(roomId);
-    socket.emit('room-created', roomId);
+  socket.on('offer', (offer) => {
+    socket.broadcast.emit('offer', offer);
   });
 
-  socket.on('join-room', (roomId) => {
-    socket.join(roomId);
-    socket.emit('joined-room', roomId);
+  socket.on('answer', (answer) => {
+    socket.broadcast.emit('answer', answer);
   });
 
-  socket.on('screen-data', ({ roomId, data }) => {
-    socket.to(roomId).emit('screen-data', data);
+  socket.on('ice-candidate', (candidate) => {
+    socket.broadcast.emit('ice-candidate', candidate);
   });
 
   socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
+    console.log('Usuario desconectado:', socket.id);
   });
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
